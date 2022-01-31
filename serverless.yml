@@ -1,0 +1,50 @@
+service: backend
+frameworkVersion: '2 || 3'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: '20201221'
+  profile: serverless-admin
+  region: <aws-region>
+  httpApi:
+    cors: true
+      
+    authorizers:
+      myAuthorizer:
+        identitySource: $request.header.Authorization
+        issuerUrl: cognito-issuer
+        audience: 
+          - < aws - app id >
+
+
+functions:
+  api:
+    handler: handler.handler
+    events:
+      - httpApi:
+          method: GET
+          path: /admin/prod/{method}
+          authorizer: myAuthorizer
+          
+
+
+  openapi:
+    handler: handler.handler
+    events:
+      - httpApi: '*'
+          
+  
+
+  adminapi:
+    handler: handler.handler
+    events:
+      - httpApi:
+          method: POST
+          path: /admin/prod/{method}
+          authorizer: myAuthorizer
+
+
+  
+  
+
