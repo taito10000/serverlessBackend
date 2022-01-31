@@ -134,7 +134,7 @@ app.get("/category", async (req, res, next) => {
 
 
 
-
+// TODO:
 // ENDPOINT 2:   POST - Receives sql command from frontend. For sandboxing purposes
 // NEEDS AUTHENTICATION ???
 
@@ -158,7 +158,7 @@ app.post("/", async (req, res, next) => {
 });
 
 
-
+// TODO
 // ENDPOINT X :  Admin - 
 // AUTHENTICATION NEEDED
 
@@ -188,6 +188,7 @@ app.post("/admin/prod", async (req, res, next) => {
 
 
 
+// TODO
 // ENDPOINT X : Admin - GET - Needed???
 // AUTHENTICATION NEEDED.
 
@@ -209,7 +210,7 @@ app.get("/admin/prod/:method", (req, res, next) => {
 });
 
 
-
+// TODO
 // ENDPOINT 3 : ADMIN POST with resource variable. add f.e. is for creating + adding product to database. 
 // AUTHENTICATION NEEDED
 
