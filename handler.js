@@ -35,7 +35,7 @@ const dataMaker = (keys, data) => {
   vals.forEach((item, i) => {
     const tmp = {};
     keys.forEach((key, j) => { tmp[key] = item[j] });
-    out.push([tmp]);
+    out.push(tmp);
     
   });
   
@@ -83,9 +83,7 @@ app.get("/", async (req, res, next) => {
     
     const prods = dataMaker(prodKeys, data.records);
     
-    return res.status(200).json(
-      JSON.stringify(prods)
-  );
+    return res.status(200).json(prods);
 });
 
 app.get("/cats", async (req,res) => {
@@ -101,7 +99,7 @@ app.get("/cats", async (req,res) => {
     }
   ).promise();
   const cats = dataMaker(catKeys, data.records);
-  return res.status(200).json(JSON.stringify(cats));
+  return res.status(200).json(cats);
 
 });
 
