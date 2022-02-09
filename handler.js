@@ -2,6 +2,7 @@ const serverless = require("serverless-http");
 const express = require("express");
 const res = require("express/lib/response");
 const AWS = require('aws-sdk');
+const keys = require('./K');
 
 const app = express();
 
@@ -9,10 +10,11 @@ const app = express();
 
 
 const datab = new AWS.RDSDataService({region: '<aws-region>'});
-const databasename = '<mydatabasename>';
-const cluster_arn = '<my-cluster-arn>';
-const db_secret = '<arn:aws:secretsmanager: Area : ... >';
-const prodKeys = ['unique_id', 'product_id', 'category', 'sub_category', 'title', 'metatitle', 'description', 'manufacturer', 'image_link', 'status', 'price'];
+const databasename = keys.dbname;
+const cluster_arn = keys.cluster_arn;
+const db_secret = keys.db_secret;
+const prodKeys = ['unique_id', 'product_id', 'category', 'sub_category','sub_category2', 'title', 'metatitle', 'description', 'manufacturer', 'image_link', 'status', 'price'];
+const catKeys = ['id', 'category', 'type', 'image_link'];
 
 
 // Data from RDS-Aurora comes without keynames. This function combines keys and values to an object it returns. 
@@ -86,6 +88,22 @@ app.get("/", async (req, res, next) => {
   );
 });
 
+app.get("/cats", async (req,res) => {
+
+  const type = req.query.var1 || '';
+  let sql = 'SELECT * FROM Categories';
+  if (type !== '') {sql = `SELECT * FROM Categories WHERE type = '${type}'`};
+  const data = await datab.executeStatement(
+    {secretArn: db_secret,
+      database: databasename,
+      resourceArn: cluster_arn,
+      sql: sql,
+    }
+  ).promise();
+  const cats = dataMaker(catKeys, data.records);
+  return res.status(200).json(JSON.stringify(cats));
+
+});
 
 // ENDPOINT X:   resource with parameter/parametres -> To be used f.e. with filtering by categories.
 // 
@@ -93,19 +111,22 @@ app.get("/", async (req, res, next) => {
 
 app.get("/category", async (req, res, next) => {
  
-  const category1 = req.query.var1;
+  const category1 = req.query.var1 || '';
   const category2 = req.query.var2 || '';
-
-  console.log(req.query);
 
   let sql = '';
   if (category2 === '') {
     sql = `SELECT * FROM Products WHERE category = '${category1}';`
   } 
+  else if (category1 === '') {
+
+    sql = `SELECT * FROM Products WHERE sub_category = '${category2}' OR sub_category2 = '${category2}'`;
+  }
+
   else {
-    sql = `SELECT * FROM Products WHERE category = '${category1}' AND sub_category = '${category2}';`
+    sql = `SELECT * FROM Products WHERE category = '${category1}' AND (sub_category = '${category2}' OR sub_category2 = '${category2}';`
  };
-  console.log(sql);
+  
   const data = await datab.executeStatement(
     {
       secretArn: db_secret,
@@ -125,7 +146,6 @@ app.get("/category", async (req, res, next) => {
 
     }; 
 });
-
 
 
 
