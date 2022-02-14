@@ -99,6 +99,23 @@ const CreateCategory = () => {
     };
 
 
+    const btnClickHandler = async () => {
+
+
+        const url = URLPREFIX+'admin/prod/addcategory';
+        const info = {
+            category: name,
+            type: selectedCategory,
+            image_link: imgLink
+        }
+        const params = {
+            method: 'POST',
+            headers: {'content-type': 'application/json', 'Authorization': props.token},
+            body: JSON.stringify(info)
+        }
+        const response = await postData(url, params);
+        console.log(response);
+    };
 
 
 
@@ -120,8 +137,8 @@ const CreateCategory = () => {
                <p><label>image link</label>
                 <input type='text' style={{width: '63%', marginLeft: "38px"}} value={imgLink} onChange={(e) => onChangeHandler(e, 'link')}></input></p>
                <div className="btnContainer"> 
-                <button className='createCatButton'>Reset</button>
-                <button className='createCatButton'>Create</button>
+                <button name="reset" className='createCatButton' onClick={btnClickHandler}>Reset</button>
+                <button name="create" className='createCatButton' onClick={btnClickHandler}>Create</button>
                 </div>
             </div>
         </div>
