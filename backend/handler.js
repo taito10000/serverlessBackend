@@ -146,7 +146,32 @@ app.get("/category", async (req, res, next) => {
 });
 
 
+// ENDPOINT 3 : ADMIN POST with resource variable. add f.e. is for creating + adding product to database. 
+// AUTHENTICATION NEEDED
 
+
+app.post("/admin/prod/:method", async (req, res, next) => {
+
+
+  if (req.url === '/admin/prod/add') {
+
+    const data = req.body;
+    const mysql = `INSERT INTO Products (category, sub_category, sub_category2, title, meta_title, description, manufacturer, image_link, status, amount, price) VALUES ('${data.category}', '${data.sub_category}','${data.sub_category2}', '${data.title}', '${data.meta_title}', '${data.description}', '${data.manufacturer}', '${data.image_link}', '${data.status}', ${data.amount}, ${data.price});`;
+    try {
+    const sqldata = await datab.executeStatement(
+      {secretArn: db_secret,
+      database: databasename,
+      resourceArn: cluster_arn,
+      sql: mysql
+    }).promise();
+  }
+  catch(err){ return res.status(500).json({message: "database error"})};
+    return res.status(200)
+              .json({message: "New Product Created and added to the database",});
+                                 };
+
+
+  });
 
 
 
@@ -228,37 +253,8 @@ app.get("/admin/prod/:method", (req, res, next) => {
 });
 
 
-// TODO
-// ENDPOINT 3 : ADMIN POST with resource variable. add f.e. is for creating + adding product to database. 
-// AUTHENTICATION NEEDED
-
-app.post("/admin/prod/:method", async (req, res, next) => {
-
-  
-  /*res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST', 'OPTIONS', 'DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, content-type, Authorization'); 
-  res.header('Access-Control-Allow-Credentials', 'true');
-*/
-
-  if (req.url === '/admin/prod/add') {
-
-    const data = req.body;
-    const mysql = `INSERT INTO Products (product_id, category, sub_category, title, meta_title, description, manufacturer, image_link, status, price) VALUES (${data.productId}, '${data.category}', '${data.subCategory}', '${data.title}', '${data.metaTitle}', '${data.description}', '${data.manufacturer}', '${data.linkToPic}', '${data.status}', ${data.price});`;
-    
-    const sqldata = await datab.executeStatement(
-      {secretArn: db_secret,
-      database: databasename,
-      resourceArn: cluster_arn,
-      sql: mysql
-    }).promise();
-
-    return res.status(200)
-              .json({message: "New Product Created and added to the database",});
-                                 };
 
 
-  });
 
 
 
