@@ -1,0 +1,120 @@
+
+label {
+
+    display: inline-block;
+    margin-left: 20px;
+    margin-top: 12px;
+}
+
+input {
+    
+   display: inline-block;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 0.7rem;
+    width: 25%;
+    height: 1.5rem;
+    border: none;
+    border-radius: 2px;
+    padding-left: 4px;
+    margin-left: 15px;
+}
+
+#container {
+
+    display: block;
+    background-color: #d2e1f5;
+    width:65%;
+    height: 150px;
+    top: 6rem;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+    padding-left: 2%;
+    padding-top:2%;
+    border-radius: 10px;
+}
+
+
+
+
+.dropdown {
+
+    display: inline-block;
+    margin-left: 10px;
+}
+.dropdown-content {
+
+    display: none;
+    background-color: #5c6da3;
+    position:absolute;
+    min-width: 160px;
+    z-index: 1;
+    padding: 7px 0px;
+    list-style: none;
+    border-radius: 10px;
+
+}
+@keyframes fadein {
+
+    from {background-color: #5c6da300;}
+    to {background-color: #5c6da3ff;}
+
+
+}
+
+.listvisible {
+
+    display:block;
+    list-style-type:none;  
+    animation-name: fadein;
+    animation-duration: 300ms;
+}
+
+
+
+.droplist {
+    text-align: left;
+    color:azure;
+    list-style: none;
+    list-style-position: outside;
+    margin: 4px 0px;
+    padding-left: 0px;
+
+}
+
+.listitem {
+
+    color:white;
+    padding-left:10px;
+    margin-top:4px;
+
+}
+
+.listitem:hover {
+
+    background-color: #3359d8;
+    color: rgb(194, 194, 194);
+}
+
+
+
+.btnContainer {
+
+    text-align: center;
+}
+.createCatButton {
+
+    width:150px;
+    height:30px;
+    border: none;
+    border-radius: 10px;
+    background-color: #5c6da3;
+    color: white;
+    margin-left: 15px;
+    margin-top: 10px;
+
+}
+.createCatButton:hover {
+    background-color: #3359d8;
+}

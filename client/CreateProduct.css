@@ -1,0 +1,170 @@
+
+
+
+.dropdown {
+
+    position: relative;
+    display: inline-block;
+    font-size: 0.8rem;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    background-color: rgb(255, 255, 255);
+    color:rgb(58, 58, 58);
+    padding-left: 4px;
+    width: 25%;
+    height: 1.5rem;
+    margin:2px;
+    text-align: center;
+    
+}
+
+.dropdown-content {
+
+    display: none;
+    background-color: #5c6da3;
+    position:absolute;
+    min-width: 160px;
+    z-index: 1;
+    padding: 7px 0px;
+    list-style: none;
+    border-radius: 10px;
+   
+
+}
+/*.dropdown:hover .dropdown-content {
+
+    display: block;
+    list-style-type: none;
+
+}
+*/
+@keyframes fadein {
+
+    from {background-color: #5c6da300;}
+    to {background-color: #5c6da3ff;}
+
+
+}
+
+.listvisible {
+
+    display:block;
+    list-style-type:none;  
+    animation-name: fadein;
+    animation-duration: 300ms;
+    
+}
+
+
+
+
+.droplist {
+    text-align: left;
+    color:azure;
+    list-style: none;
+    list-style-position: outside;
+    margin: 4px 0px;
+    padding-left: 0px;
+   
+   
+
+}
+.listitem {
+
+    color:white;
+    padding-left:10px;
+    margin-top:4px;
+   
+
+
+}
+
+.listitem:hover {
+
+    background-color: #3359d8;
+    color: rgb(194, 194, 194);
+}
+
+.listnew {
+
+    color: black;
+
+}
+
+hr {
+
+    pointer-events: none;
+
+
+}
+
+
+.newproductcontainer {
+
+    
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+    margin-top:50px;
+    padding-top:0px;
+    text-align: left;
+}
+
+p {
+
+    margin: 2px;
+    padding: 2px;
+    
+}
+
+label {
+    
+    display: block;
+    font-size: 0.7rem;
+    margin: 0px;
+    padding: 0px;
+}
+
+input {
+    
+    display: block;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 0.7rem;
+    height: 1.5rem;
+    border: none;
+    border-radius: 2px;
+    padding-left: 4px;
+
+}
+
+
+textarea {
+
+    font-size: 0.7rem;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    height: 100px;
+    border: none;
+    border-radius: 2px;
+    padding-left: 4px;
+
+}
+.buttons {
+    margin-top: 20px;
+    text-align: center;
+}
+.submitBtns {
+
+    margin-left: 15px;
+    width: 75px;
+    height: 30px;
+    border: none;
+    border-radius: 5px;
+    background-color: #5c6da3;
+    color: white;
+
+}
+.submitBtns:hover {
+
+   background-color: #3359d8;
+
+
+}
