@@ -1,5 +1,5 @@
 # Serverless backend for AWS
-Webstore - a shared trainee project where I am working on backend. This excerpt is just for an example of NodeJS backend with serverless AWS Lambda functions using AuroraDB (RDS) and client side Admin pages with sign in to Cognito user pool. 
+Webstore - a shared trainee project where I am working on backend and admin pages. This excerpt is just for an example of NodeJS backend with serverless AWS Lambda functions using AuroraDB (RDS) and client side Admin pages with sign in to Cognito user pool. 
 
 Cognito user pool authentication is for accessing apis for adding, removing and editing items/products. Cognito and AuroraDB are configured via AWS Console.
 
