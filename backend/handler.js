@@ -1,71 +1,83 @@
 const serverless = require("serverless-http");
+
 const express = require("express");
-const res = require("express/lib/response");
+const MYSQL = require('serverless-mysql')();
 const AWS = require('aws-sdk');
 const keys = require('./K');
-
 const app = express();
-
-
-
-
-const datab = new AWS.RDSDataService({region: '<aws-region>'});
-const databasename = keys.dbname;
-const cluster_arn = keys.cluster_arn;
-const db_secret = keys.db_secret;
-const prodKeys = ['unique_id', 'product_id', 'category', 'sub_category','sub_category2', 'title', 'metatitle', 'description', 'manufacturer', 'image_link', 'status', 'price'];
-const catKeys = ['id', 'category', 'type', 'image_link'];
-
-
-// Data from RDS-Aurora comes without keynames. This function combines keys and values to an object it returns. 
-
-const dataMaker = (keys, data) => {
-
-  const out = [];
-  const vals = [];
-  data.forEach(item => {
-    const tmp = [];
-    item.forEach(obj => {
-        tmp.push(Object.values(obj)[0]);
-        
-    })
-    vals.push(tmp);
-  });
-
-  vals.forEach((item, i) => {
-    const tmp = {};
-    keys.forEach((key, j) => { tmp[key] = item[j] });
-    out.push(tmp);
-    
-  });
-  
-  return out;
-};
-
-
-
-// The required headers - CORS and Authorization needs some headers to be configured.
-
 app.use(express.json());
+
 
 
 app.use((req, res, next) => {
   console.log('APP USE !!!', req);
   
   const origin = req.origin;
-  
+  console.log("\n\n REQUEST: ", req);
   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-  res.header('Access-Control-Allow-Methods', 'GET, POST', 'OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'X-Requested-With, content-type, Authorization'); 
-  res.header('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, content-type, Authorization, X-Auth-Token, Origin');  
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+            
+            
   if (req.method === 'OPTIONS') {
-    // console.log("OPTIONS NÄHTY!!!")
-    return res.status(204);
+    console.log("OPTIONS NÄHTY!!!")
+    return res.status(204).end();
   };
-  
-  next();
 
+  next();
 });
+
+
+MYSQL.config({
+
+    host: keys.HOST,
+    user: keys.USER,
+    password: keys.PASSWORD,
+    database: keys.DATABASE
+
+  });
+
+
+
+
+const sqlQuery = async (sql) => {
+
+    const data =  await MYSQL.query(sql);
+    console.log("DATA: ", data);
+    await MYSQL.end();
+  
+    return data;
+};
+
+
+
+
+
+const prodKeys = ['id', 'category', 'sub_category','sub_category2', 'title', 'subtitle', 'description', 'brand', 'image_link', 'status', 'amount', 'price'];
+const catKeys = ['id', 'category', 'type', 'image_link'];
+
+// Data from MYSql comes without keynames. This function combines keys and values to an object it returns. 
+
+const dataMaker = (keys, data) => {
+  const rows = new Array(data);
+  const vals = [];
+  rows[0].forEach(row => {
+    const tmp = {};
+    keys.forEach( (key, j) => {
+          tmp[key] = row[key];
+          
+    }) 
+    
+    vals.push(tmp);
+  });
+
+  return vals;
+};
+
+
+
+
 
 
 // ENDPOINT 1: resource root - GET ->  sql-request: get all (or some default) Products
@@ -73,38 +85,45 @@ app.use((req, res, next) => {
 
 app.get("/", async (req, res, next) => {
  
-  res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-    const data = await datab.executeStatement(
-      {secretArn: db_secret,
-      database: databasename,
-      resourceArn: cluster_arn,
-      sql: 'SELECT * FROM Products'
-    }).promise();
+  //res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
     
-    const prods = dataMaker(prodKeys, data.records);
+    const data = await sqlQuery(`SELECT * FROM Products;`);
     
-    return res.status(200).json(prods);
+    const prods = dataMaker(prodKeys, data);
+    
+    //res.setHeader('content-type', 'application/json');
+    return res.status(200).json(
+      prods
+  );
 });
+
+
+// ENDPOINT 2: category listing. /cats -> all gategories
+//  .../cats?var1=main   ->   main categories
+//  .../cats?var1=sub    ->   sub-categories
+// NO AUTHENTICATION
 
 app.get("/cats", async (req,res) => {
 
+  console.log("CATS !!!");
+
   const type = req.query.var1 || '';
-  let sql = 'SELECT * FROM Categories';
-  if (type !== '') {sql = `SELECT * FROM Categories WHERE type = '${type}'`};
-  const data = await datab.executeStatement(
-    {secretArn: db_secret,
-      database: databasename,
-      resourceArn: cluster_arn,
-      sql: sql,
-    }
-  ).promise();
-  const cats = dataMaker(catKeys, data.records);
+  let sql = 'SELECT * FROM Categories;';
+  if (type !== '') {sql = `SELECT * FROM Categories WHERE type = '` + type +`';`};
+  console.log("CATS QUERY: ", sql);
+
+  const data = await sqlQuery(sql);
+  
+  const cats = dataMaker(catKeys, data);
   return res.status(200).json(cats);
 
 });
 
-// ENDPOINT X:   resource with parameter/parametres -> To be used f.e. with filtering by categories.
-// 
+
+
+
+// ENDPOINT X: Get products filtered with category 
+// (  f.e.   aws-prefix/category?var1=sticks&var2=wooden  )
 // NO AUTHENTICATION
 
 app.get("/category", async (req, res, next) => {
@@ -125,16 +144,11 @@ app.get("/category", async (req, res, next) => {
     sql = `SELECT * FROM Products WHERE category = '${category1}' AND (sub_category = '${category2}' OR sub_category2 = '${category2}';`
  };
   
-  const data = await datab.executeStatement(
-    {
-      secretArn: db_secret,
-      database: databasename,
-      resourceArn: cluster_arn,
-      sql: sql
-    }).promise();
-  
+  const data = await sqlQuery(sql);
+
+
   if (data.records.length > 0) { 
-    const prods = dataMaker(prodKeys, data.records);
+    const prods = dataMaker(prodKeys, data);
     return res.status(200).json(JSON.stringify(prods));
   }
     
@@ -146,38 +160,78 @@ app.get("/category", async (req, res, next) => {
 });
 
 
-// ENDPOINT 3 : ADMIN POST with resource variable. add f.e. is for creating + adding product to database. 
-// AUTHENTICATION NEEDED
-
 
 app.post("/admin/prod/:method", async (req, res, next) => {
 
-
+  
+  // PRODUCTS: Add
   if (req.url === '/admin/prod/add') {
 
+    
     const data = req.body;
-    const mysql = `INSERT INTO Products (category, sub_category, sub_category2, title, meta_title, description, manufacturer, image_link, status, amount, price) VALUES ('${data.category}', '${data.sub_category}','${data.sub_category2}', '${data.title}', '${data.meta_title}', '${data.description}', '${data.manufacturer}', '${data.image_link}', '${data.status}', ${data.amount}, ${data.price});`;
-    try {
-    const sqldata = await datab.executeStatement(
-      {secretArn: db_secret,
-      database: databasename,
-      resourceArn: cluster_arn,
-      sql: mysql
-    }).promise();
-  }
-  catch(err){ return res.status(500).json({message: "database error"})};
+    
+    const sql = `INSERT INTO Products (category, sub_category, sub_category2, title, subtitle, description, brand, image_link, status, amount, price) VALUES ('`
+              + data.category +`', '`
+              + data.sub_category +`','`
+              + data.sub_category2 +`', '` 
+              + data.title + `', '`
+              + data.subtitle + `', '`
+              + data.description + `', '` 
+              + data.brand + `', '` 
+              + data.image_link + `', '` 
+              + data.status + `', `
+              + parseInt(data.amount) + `, `
+              + parseFloat(data.price) + `);`;
+   
+    
+    console.log("\n CREATE SQL: ",sql);
+
+    const sqldata = await sqlQuery(sql);
+    
+    console.log("PRODUCT ADD PROMISE TRY LOHKOSSA");
+  
+  //catch(err){ return res.status(500).json({message: "database error"})};
     return res.status(200)
               .json({message: "New Product Created and added to the database",});
                                  };
 
 
+  // CATEGORIES : Add
+  if (req.url === '/admin/prod/addcategory') {
+    const data = req.body;
+    console.log("\n DATA categories: ", data);
+    const sql = `INSERT INTO Categories (category, type, image_link) VALUES ('`
+                + data.category +`', '`
+                + data.type + `','` 
+                + data.image_link + `');`;
+    try {
+      const sqldata = await sqlQuery(sql);
+  }
+    catch(err){ return res.status(500).json({message: "database error"})};
+    return res.status(200)
+              .json({message: "New Category Created",});
+    };
+
+    
+    // DELETE PRODUCT
+    
+    if (req.url === '/admin/prod/deleteproduct') {
+
+        const data = req.body;
+        const sql = `DELETE FROM Products WHERE ID = `+ req.body.id + `;`
+
+        try {const sqldata = await sqlQuery(sql);
+              return res.status(200).json({message: "deleted!"});
+        
+        }
+        catch(err) {return res.status(500).json({message: "query error"})};
+
+    };
   });
 
 
 
 
-
-// TODO:
 // ENDPOINT 2:   POST - Receives sql command from frontend. For sandboxing purposes
 // NEEDS AUTHENTICATION ???
 
@@ -186,14 +240,9 @@ app.post("/", async (req, res, next) => {
   
   
   const bd = req.body.hello;
-  const data = await datab.executeStatement(
-    {secretArn: db_secret,
-    database: databasename,
-    resourceArn: cluster_arn,
-    sql: req.body.sql
-  }).promise();
+  const data = await sqlQuery(req.body.sql);
   
-  const prods = dataMaker(prodKeys, data.records);
+  const prods = dataMaker(prodKeys, data);
   
   return res.status(200).json(
     JSON.stringify(prods)
@@ -201,7 +250,7 @@ app.post("/", async (req, res, next) => {
 });
 
 
-// TODO
+
 // ENDPOINT X :  Admin - 
 // AUTHENTICATION NEEDED
 
@@ -231,7 +280,6 @@ app.post("/admin/prod", async (req, res, next) => {
 
 
 
-// TODO
 // ENDPOINT X : Admin - GET - Needed???
 // AUTHENTICATION NEEDED.
 
@@ -255,11 +303,7 @@ app.get("/admin/prod/:method", (req, res, next) => {
 
 
 
-
-
-
 module.exports.hellow = hellow;
-
 module.exports.handler = serverless(app);
 
 

@@ -1,9 +1,14 @@
 import {useState, useEffect } from 'react';
-import { getData } from '../../functions/getData';
+import { getData, postData } from '../../functions/getData';
 import { URLPREFIX } from '../../constants';
 import './CreateCategory.css';
+import { readSession } from '../../functions/authenticate';
 
-const CreateCategory = () => {
+
+
+
+
+const CreateCategory = (props) => {
 
 
     const [mains, setMains] = useState([]);
@@ -25,15 +30,7 @@ const CreateCategory = () => {
     
     useEffect(dataloader, []);
     
-    const logger = () => {
-
-            console.log(mains);
-            console.log(subs);
-
-        };
-
-    useEffect(logger, [mains]);
-
+   
 
 
    
@@ -64,10 +61,10 @@ const CreateCategory = () => {
     const selectCategory = (e) => {
 
         const list = document.querySelectorAll('.dropdown-content');
-        console.log(list);
+        
        // list.forEach(item => {item.classList.remove('listvisible')});
         setSelectedCategory(e.target.outerText);
-        console.log(list);
+        
     };
 
     
@@ -93,11 +90,8 @@ const CreateCategory = () => {
                 <li className='listitem' onClick={selectCategory}>sub</li>
             </span>
             </div>
-
-
         )
     };
-
 
     const btnClickHandler = async () => {
 
@@ -107,12 +101,16 @@ const CreateCategory = () => {
             category: name,
             type: selectedCategory,
             image_link: imgLink
-        }
+        };
+        console.log(info);
+
         const params = {
             method: 'POST',
-            headers: {'content-type': 'application/json', 'Authorization': props.token},
+            headers: {'content-type': 'application/json', 'Authorization': readSession('access')},
             body: JSON.stringify(info)
-        }
+        };
+
+        console.log(params);
         const response = await postData(url, params);
         console.log(response);
     };
@@ -128,12 +126,12 @@ const CreateCategory = () => {
 
         <div>
             <div id='container'>
-               <p> <label>category name</label>
+                <label>category name</label>
                 <input type='text' value={name} onChange={(e) => onChangeHandler(e, 'name')} ></input>
                 <label>category type</label>
                 <div className='dropdown' onClick={listClickHandler} onMouseLeave={listMouseLeaveHandler}> {selectedCategory}
                     <div className='dropdown-content'>{droplist()}</div>
-                </div></p>
+                </div>
                <p><label>image link</label>
                 <input type='text' style={{width: '63%', marginLeft: "38px"}} value={imgLink} onChange={(e) => onChangeHandler(e, 'link')}></input></p>
                <div className="btnContainer"> 

@@ -4,6 +4,7 @@ import { getData, postData } from "../../functions/getData";
 import { URLPREFIX } from '../../constants';
 import './CreateProduct.css';
 import { useEffect, useState } from "react";
+import { readSession } from "../../functions/authenticate";
 
 
 const CreateProduct = (props) => {
@@ -18,42 +19,41 @@ const CreateProduct = (props) => {
     const [info, setInfo] = useState({
 
         title: '',
-        meta_title: '',
+        subtitle: '',
         description: '',
-        manufacturer: '',
+        brand: '',
         image_link: '',
         status: '',
-        amount: 0,
-        price: 0
+        amount: 0.0,
+        price: ''
     });
 
 
-    //category, sub_category, sub_category2, title, meta_title, description, manufacturer, image_link, status, amount, price
+    //category, sub_category, sub_category2, title, subtitle, description, brand, image_link, status, amount, price
     const dataloader = async () => {
+       
         const mainCategories = await getData(URLPREFIX+'cats?var1=main');
         const subCategories = await getData(URLPREFIX+'cats?var1=sub');
-        setMains(mainCategories);
-        setSubs(subCategories);
+        if (mainCategories) {setMains(mainCategories);
+                            setSubs(subCategories);
+        return [mainCategories, subCategories];
+        } 
     };
     
     useEffect(dataloader, []);
+    
 
 
+    if (readSession('access') !== null && readSession('access').length > 100) {
+    
+        console.log();
+        
+    } else {history.push('/admin')};
 
-    if (props.token.length > 100) {
 
-         //console.log("SIGNED IN.")
-        //console.log(props.token);
-
-     } else {
-
-         console.log("Not signed in");
-         history.push('/admin');
-     }
 
      const listSelectHandler = (e, type) => {
 
-       
         if (e.target.id == -1) {
             console.log("CREATE NEW CATEGORY!");
         }
@@ -72,21 +72,28 @@ const CreateProduct = (props) => {
         mouseLeaveHandler();
      };
 
+
      const inputChangeHandler = (e) => {
+        
+        if (e.target.id === 'price') {
+            const tmp = e.target.value.replace(/\,/g, '.');
+            e.target.value = tmp;
+        };
 
         setInfo({...info, [e.target.id]: e.target.value});
-
+        console.log(info.price);
      }; 
 
 
 
-     const mouseOverHandler = (e) => {
-
-        
+     const mouseClickHandler = (e) => {
         e.stopPropagation();
+        
+        if (!new Array(e.target.classList[0]).includes('listitem')) {
+        
         e.target.classList.add('.listvisible');
         e.target.children[0].classList.add('listvisible');
-        
+        }
 
      };
      const mouseLeaveHandler = (e) => {
@@ -100,7 +107,7 @@ const CreateProduct = (props) => {
         ddc.forEach(el => {
             el.classList.remove('listvisible');
         });
-
+        
      };
 
 
@@ -110,13 +117,13 @@ const CreateProduct = (props) => {
         if (e.target.id === 'reset') {
             
             setInfo({title: '',
-            meta_title: '',
+            subtitle: '',
             description: '',
-            manufacturer: '',
+            brand: '',
             image_link: '',
             status: '',
             amount: 0,
-            price: 0});
+            price: ''});
         };
         if (e.target.id === 'create') {
                
@@ -128,13 +135,26 @@ const CreateProduct = (props) => {
             const token = props.token;
             const params = {
                 method: 'POST',
-                headers: {'content-type': 'application/json', 'Authorization': token},
+                headers: {'content-type': 'application/json', 'Authorization': readSession('access')},
                 body: JSON.stringify(prodInfo)
             }
-            const response = await postData(url, params);
-            //console.log(response);
-            //console.log(prodInfo);
-
+            try {
+                console.log(params);
+                const response = await postData(url, params);
+                alert('Product added to store.');
+                setInfo({title: '',
+                subtitle: '',
+                description: '',
+                brand: '',
+                image_link: '',
+                status: '',
+                amount: 0,
+                price: ''});
+                
+            }
+            
+            
+            catch(err){console.log(err)}
 
         }; 
 
@@ -177,39 +197,39 @@ return (
     <div className="newproductcontainer">
         
       <p>
-        <label>nimi</label></p>
-      <input id="title" style={{width: "55%"}} onChange={inputChangeHandler}></input>
+        <label>title</label></p>
+      <input id="title" style={{width: "55%"}} onChange={inputChangeHandler} value={info.title}></input>
       <p>
-        <label>alaotsikko</label></p>
-      <input id="meta_title" style={{width: "55%"}} onChange={inputChangeHandler}></input>
-      <p><label>kategoria</label></p>
-      <div className="dropdown" onMouseEnter={mouseOverHandler} onMouseLeave={mouseLeaveHandler}>{selectedCategory}
+        <label>subtitle</label></p>
+      <input id="subtitle" style={{width: "55%"}} onChange={inputChangeHandler} value={info.subtitle}></input>
+      <p><label>category</label></p>
+      <div className="dropdown" onClick={mouseClickHandler} onMouseLeave={mouseLeaveHandler}>{selectedCategory}
         <div className="dropdown-content"> 
             <ul className="droplist">{dropContent('main')}</ul>
         </div>
       </div>
-      <p><label>alakategoria</label></p>
-      <div className="dropdown" onMouseEnter={mouseOverHandler} onMouseLeave={mouseLeaveHandler}>{subCategory}
+      <p><label>subcategory</label></p>
+      <div className="dropdown" onClick={mouseClickHandler} onMouseLeave={mouseLeaveHandler}>{subCategory}
         <div className="dropdown-content"> 
             <ul className="droplist">{dropContent('sub')}</ul>
         </div>
       </div>
-      <p><label>alakategoria2</label></p>
-      <div className="dropdown" onMouseEnter={mouseOverHandler} onMouseLeave={mouseLeaveHandler}>{subCategory2}
+      <p><label>subcategory 2</label></p>
+      <div className="dropdown" onClick={mouseClickHandler} onMouseLeave={mouseLeaveHandler}>{subCategory2}
         <div className="dropdown-content"> 
             <ul className="droplist">{dropContent('sub2')}</ul>
         </div>
       </div>
-      <p><label>Valmistaja</label></p>
-      <input id="manufacturer" style={{width: "55%"}} onChange={inputChangeHandler}></input>
-      <p><label>Tuotekuvaus</label></p>
-      <textarea id="description" style={{width: "55%"}} onChange={inputChangeHandler}></textarea>
-      <p><label>määrä</label></p>
-      <input type="number" id="amount" onChange={inputChangeHandler} autoComplete="off"></input>
-      <p><label>hinta</label></p>
-      <input type="number"id="price" onChange={inputChangeHandler} autoComplete="off"></input>
-      <p><label>kuvalinkki</label></p>
-      <input id="image_link" style={{width: "55%"}} onChange={inputChangeHandler} autoComplete="off"></input>
+      <p><label>brand</label></p>
+      <input id="brand" style={{width: "55%"}} onChange={inputChangeHandler} value={info.brand}></input>
+      <p><label>description</label></p>
+      <textarea id="description" style={{width: "55%"}} onChange={inputChangeHandler} value={info.description}></textarea>
+      <p><label>amount</label></p>
+      <input type="number" id="amount" onChange={inputChangeHandler} autoComplete="off" value={info.amount}></input>
+      <p><label>price</label></p>
+      <input id="price" onChange={inputChangeHandler} autoComplete="off" value={info.price}></input>
+      <p><label>image-link</label></p>
+      <input id="image_link" style={{width: "55%"}} onChange={inputChangeHandler} autoComplete="off" value={info.image_link}></input>
         <div className="buttons">
       <hr />
       <button className="submitBtns" id="reset" onClick={submitBtnHandler}>Reset</button><button className="submitBtns" id="create" onClick={submitBtnHandler}>Create</button></div>

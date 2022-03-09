@@ -1,0 +1,80 @@
+
+h1 {
+
+    font-size: 1rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 500;
+    margin: 1px;
+    text-align: center;
+}
+
+h2 {
+
+    font-size: 0.8rem;
+    font-weight: 100;
+    margin-top:2px;
+
+    text-align: center;
+
+}
+
+.price { 
+    text-align: right;
+    margin-right: 20px;
+    font-weight: 100;
+    font-size: 1.1rem;
+
+}
+
+.card {
+    display: inline-block;
+    width: 300px;
+    height: 200px;
+    background-color: white;
+    border-radius: 7px;
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    padding: 4px;
+    box-shadow: rgba(0, 0, 0, 0.151) 4px 4px 10px;
+    text-align: center;
+
+
+}
+.deletebtn {
+
+    position: relative;
+    left: -55px;
+    width: 79px;
+    height: 24px;
+    border-radius: 5px;
+    border-style: none;
+    background-color: #5c6da3;
+    color:white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+}
+
+.deletebtn:hover {
+
+    background-color: #3359d8;
+}
+
+
+
+img {
+
+    width: 100px;
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.055) 4px 4px 10px;
+
+}
+
+
+.deleteProduct {
+
+    display: flexbox;
+    text-align: center;
+    margin-left:100px;
+    width: 90%;
+}
